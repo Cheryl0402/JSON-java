@@ -29,7 +29,11 @@ import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
+import static java.util.Arrays.asList;
 
 
 /**
@@ -75,6 +79,8 @@ public class XML {
     public static final String NULL_ATTR = "xsi:nil";
 
     public static final String TYPE_ATTR = "xsi:type";
+
+    private static boolean done = false;
 
     /**
      * Creates an iterator for navigating Code Points in a string instead of
@@ -253,7 +259,8 @@ public class XML {
      * @return true if the close tag is processed.
      * @throws JSONException
      */
-    private static boolean parse(XMLTokener x, JSONObject context, String name, XMLParserConfiguration config)
+    private static boolean parse(XMLTokener x, JSONObject context, String name, XMLParserConfiguration config,
+                                 List<String> path, boolean found, JSONObject replacement)
             throws JSONException {
         char c;
         int i;
@@ -262,6 +269,14 @@ public class XML {
         String tagName;
         Object token;
         XMLXsiTypeConverter<?> xmlXsiTypeConverter;
+
+        //**************************************************************************************************************
+        // check path first. if path is empty. then key is empty too. parse the whole file.
+        String key = null;
+        if(path != null){
+            key = path.get(path.size() - 1);
+        }
+       //***************************************************************************************************************
 
         // Test for and skip past these forms:
         // <!-- ... -->
@@ -342,6 +357,19 @@ public class XML {
             jsonObject = new JSONObject();
             boolean nilAttributeFound = false;
             xmlXsiTypeConverter = null;
+
+            //*********************************************************************************************************
+            // if tagName equals the last key in the past, we found.
+            if (tagName.equals(key)){
+                found = true;
+            }
+            // if the tagName is not in the path, we skip past it.
+            if (replacement == null && path != null && !path.contains(tagName) && !found) {
+                x.skipPast(tagName + ">");
+                return false;
+            }
+            //*********************************************************************************************************
+
             for (;;) {
                 if (token == null) {
                     token = x.nextToken();
@@ -373,7 +401,6 @@ public class XML {
                     } else {
                         jsonObject.accumulate(string, "");
                     }
-
 
                 } else if (token == SLASH) {
                     // Empty tag <.../>
@@ -423,7 +450,34 @@ public class XML {
 
                         } else if (token == LT) {
                             // Nested element
-                            if (parse(x, jsonObject, tagName, config)) {
+               // handle tail recursion here-----------------------------------------------------------------------------
+                            if (parse(x, jsonObject, tagName, config, path, found, replacement)){
+                                //  replace object
+                                if (replacement != null && tagName.equals(key) ) {
+                                    context.put(tagName, replacement.opt(key));
+                                    return false;
+                                }
+                                // if done extract sub object, return the object, break the recursion
+                                if(done) {
+                                    context.put(key, jsonObject.opt(key));
+                                    return false;
+                                }
+                                // if found last key in the path && tagName equals last key in the path
+                                // process the copy the object to context.
+                                if (found && tagName.equals(key)) {
+                                    Iterator<String> it = jsonObject.keys();
+                                    while (it.hasNext()) {
+                                        String k = it.next();
+                                        if ( k.equals("content")){
+                                            context.put(tagName, jsonObject.opt(k));
+                                        } else {
+                                            context.put(tagName, jsonObject);
+                                        }
+                                    }
+                                    done = true;
+                                    return false;
+                                }
+            //-----------------------------------------------------------------------------------------------------------
                                 if (config.getForceList().contains(tagName)) {
                                     // Force the value to be an array
                                     if (jsonObject.length() == 0) {
@@ -676,7 +730,7 @@ public class XML {
         while (x.more()) {
             x.skipPast("<");
             if(x.more()) {
-                parse(x, jo, null, config);
+                parse(x, jo, null, config, null, false,null);  //////////////////////////////////////////////////////////
             }
         }
         return jo;
@@ -881,4 +935,48 @@ public class XML {
                         + ">" + string + "</" + tagName + ">";
 
     }
+
+    public static JSONObject toJSONObject(Reader reader, JSONPointer path) throws JSONException {
+        JSONObject jo = new JSONObject();
+        XMLTokener x = new XMLTokener(reader);
+        ArrayList<String> s = new ArrayList<String>();
+        String[] p = path.toString().split("/");
+
+        for(String k : p){
+            if(!k.equals("")){
+                s.add(k);
+            }
+        }
+
+        while (x.more()) {
+            x.skipPast("<");
+            if(x.more()) {
+                parse(x, jo, null, XMLParserConfiguration.ORIGINAL, s, false, null);
+            }
+        }
+        return jo;
+    }
+
+     public static JSONObject toJSONObject(Reader reader, JSONPointer path, JSONObject replacement) throws JSONException {
+        JSONObject jo = new JSONObject();
+        XMLTokener x = new XMLTokener(reader);
+        String[] p = path.toString().split("/");
+        ArrayList<String> s = new ArrayList<String>();
+
+         for(String k : p){
+             if(!k.equals("")){
+                 s.add(k);
+             }
+         }
+        while (x.more()) {
+            x.skipPast("<");
+            if(x.more()) {
+                parse(x, jo, null, XMLParserConfiguration.ORIGINAL, s, false, replacement);
+            }
+        }
+        return jo;
+    }
+
+
+
 }
