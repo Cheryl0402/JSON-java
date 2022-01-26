@@ -41,13 +41,7 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.json.XML;
-import org.json.XMLParserConfiguration;
-import org.json.XMLXsiTypeConverter;
+import org.json.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -65,7 +59,6 @@ public class XMLTest {
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
 
-    
     /**
      * JSONObject from a null XML string.
      * Expects a NullPointerException
@@ -1068,5 +1061,59 @@ public class XMLTest {
             });
             fail("Expected to be unable to modify the config");
         } catch (Exception ignored) { }
+    }
+
+    //***************************************************** Test case 1 ***********************************************
+    @Test
+    public void extractObjectTest(){
+        String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
+                "<contact>\n"+
+                "  <nick>Crista </nick>\n"+
+                "  <name>Crista Lopes</name>\n" +
+                "  <address>\n" +
+                "    <street>Ave of Nowhere</street>\n" +
+                "    <zipcode>92614</zipcode>\n" +
+                "  </address>\n" +
+                "</contact>";
+
+        JSONObject expectObj = XML.toJSONObject( "<street>Ave of Nowhere</street>");
+        try {
+            JSONObject jobj = XML.toJSONObject(new StringReader(xmlString), new JSONPointer("/contact/address/street"));
+            assertEquals(expectObj.toString(), jobj.toString());
+        } catch (JSONException e) {
+            System.out.println(e);
+        }
+    }
+
+    //***************************************************** Test case 2 ***********************************************
+    @Test
+    public void replaceObjectTest(){
+        String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
+                "<contact>\n"+
+                "  <nick>Crista </nick>\n"+
+                "  <name>Crista Lopes</name>\n" +
+                "  <address>\n" +
+                "    <street>Ave of Nowhere</street>\n" +
+                "    <zipcode>92614</zipcode>\n" +
+                "  </address>\n" +
+                "</contact>";
+
+        JSONObject replacement = new JSONObject();
+        replacement.put("street", "vvvvvv");
+        JSONObject expectObj = XML.toJSONObject( "<contact>\n"+
+                "  <nick>Crista </nick>\n"+
+                "  <name>Crista Lopes</name>\n" +
+                "  <address>\n" +
+                "    <street>vvvvvv</street>\n" +
+                "    <zipcode>92614</zipcode>\n" +
+                "  </address>\n" +
+                "</contact>");
+
+        try {
+            JSONObject jobj = XML.toJSONObject(new StringReader(xmlString), new JSONPointer("/contact/address/street"), replacement);
+            assertEquals(expectObj.toString(), jobj.toString());
+        } catch (JSONException e) {
+            System.out.println(e);
+        }
     }
 }
