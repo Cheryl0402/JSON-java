@@ -39,7 +39,7 @@ Bug fixes, code improvements, and unit test coverage changes are welcome! Becaus
 # Build Instructions
 
 The org.json package can be built from the command line, Maven, and Gradle. The unit tests can be executed from Maven, Gradle, or individually in an IDE e.g. Eclipse.
- 
+
 **Building from the command line**
 
 *Build the class files from the package root directory src/main/java*
@@ -82,7 +82,7 @@ java -cp .:json-java.jar Test (Unix Systems)
 {"abc":"def"}
 ````
 
- 
+
 **Tools to build the package and execute the unit tests**
 
 Execute the test suite with Maven:
@@ -95,15 +95,13 @@ Execute the test suite with Gradlew:
 ```
 gradlew clean build test
 ```
+# Team Member:
+- Yi Chen (Cheryl0402)
+- Chao Liu (lordchao)
 
 # Notes about Milestone 2
 You can build the project using ways mentioned above.
-If you are using IntelliJ, just simply open the project. You will be able to run it.
-
-*toJSONObject methods*
-- It's in the last part of the xml class. Edited code in the parse function has been commented out.
-
-*Junit Test*
+@@ -107,16 +13,3 @@ If you are using IntelliJ, just simply open the project. You will be able to run
 They are in the last part of the XMLTest class
 - task1 test --- run the extractObjectTest() 
 - task2 replace test --- run the replaceObjectTest() 
