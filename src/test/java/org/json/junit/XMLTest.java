@@ -1116,4 +1116,52 @@ public class XMLTest {
             System.out.println(e);
         }
     }
+
+    @Test
+    public void addPrefixFunctionTest() {
+        String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<contact>\n" +
+                "  <nick>Crista </nick>\n" +
+                "  <name>Crista Lopes</name>\n" +
+                "  <address>\n" +
+                "    <street>Ave of Nowhere</street>\n" +
+                "    <zipcode>92614</zipcode>\n" +
+                "  </address>\n" +
+                "</contact>";
+        class CustomerFunction implements XML.Function {
+            public String func(String key) {
+                return "a-- " + key;
+            }
+        }
+        String result = "{\"a-- contact\":{\"a-- name\":\"Crista Lopes\",\"a-- address\":{\"a-- zipcode\":92614," +
+                "\"a-- street\":\"Ave of Nowhere\"},\"a-- nick\":\"Crista\"}}";
+        CustomerFunction customerFunction = new CustomerFunction();
+        JSONObject jo = XML.toJSONObject(new StringReader(xmlString), customerFunction);
+        assertEquals(jo.toString(), result);
+
+    }
+
+
+    @Test
+    public void reverseFunctionTest() {
+        String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<contact>\n" +
+                "  <nick>Crista </nick>\n" +
+                "  <name>Crista Lopes</name>\n" +
+                "  <address>\n" +
+                "    <street>Ave of Nowhere</street>\n" +
+                "    <zipcode>92614</zipcode>\n" +
+                "  </address>\n" +
+                "</contact>";
+            class CustomerFunction2 implements XML.Function{
+                public String func(String key){
+                    return new StringBuilder(key).reverse().toString();
+                }
+            }
+            String result2 = "{\"tcatnoc\":{\"eman\":\"Crista Lopes\",\"sserdda\":{\"edocpiz\":92614,\"teerts\":\"Ave of Nowhere\"},\"kcin\":\"Crista\"}}";
+            CustomerFunction2 customerFunction2 = new CustomerFunction2();
+            JSONObject jo2 = XML.toJSONObject(new StringReader(xmlString), customerFunction2);
+        assertEquals(jo2.toString(), result2);
+
+    }
 }

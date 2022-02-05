@@ -26,14 +26,11 @@ SOFTWARE.
 
 import java.io.Reader;
 import java.io.StringReader;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import static java.util.Arrays.asList;
 
 
 /**
@@ -259,8 +256,24 @@ public class XML {
      * @return true if the close tag is processed.
      * @throws JSONException
      */
+    public interface Function {
+        String func(String key);
+    }
+
+    public static JSONObject toJSONObject(Reader reader, Function func) {
+        JSONObject jo = new JSONObject();
+        XMLTokener x = new XMLTokener(reader);
+        while (x.more()) {
+            x.skipPast("<");
+            if(x.more()) {
+                parse(x, jo, "", XMLParserConfiguration.ORIGINAL, null, false, null, func);
+            }
+        }
+        return jo;
+    }
+
     private static boolean parse(XMLTokener x, JSONObject context, String name, XMLParserConfiguration config,
-                                 List<String> path, boolean found, JSONObject replacement)
+                                 List<String> path, boolean found, JSONObject replacement, Function func)
             throws JSONException {
         char c;
         int i;
@@ -335,6 +348,7 @@ public class XML {
             // Close tag </
 
             token = x.nextToken();
+            token = func.func((String) token);
             if (name == null) {
                 throw x.syntaxError("Mismatched close tag " + token);
             }
@@ -352,7 +366,8 @@ public class XML {
             // Open tag <
 
         } else {
-            tagName = (String) token;
+            tagName = func.func((String) token);
+            //tagName = func((String) token);
             token = null;
             jsonObject = new JSONObject();
             boolean nilAttributeFound = false;
@@ -376,7 +391,8 @@ public class XML {
                 }
                 // attribute = value
                 if (token instanceof String) {
-                    string = (String) token;
+                    string = func.func((String) token);
+                    //string = (String) token;
                     token = x.nextToken();
                     if (token == EQ) {
                         token = x.nextToken();
@@ -451,7 +467,7 @@ public class XML {
                         } else if (token == LT) {
                             // Nested element
                // handle tail recursion here-----------------------------------------------------------------------------
-                            if (parse(x, jsonObject, tagName, config, path, found, replacement)){
+                            if (parse(x, jsonObject, tagName, config, path, found, replacement, func)){
                                 //  replace object
                                 if (replacement != null && tagName.equals(key) ) {
                                     context.put(tagName, replacement.opt(key));
@@ -730,7 +746,7 @@ public class XML {
         while (x.more()) {
             x.skipPast("<");
             if(x.more()) {
-                parse(x, jo, null, config, null, false,null);  //////////////////////////////////////////////////////////
+                parse(x, jo, null, config, null, false,null, null);  //////////////////////////////////////////////////////////
             }
         }
         return jo;
@@ -951,7 +967,7 @@ public class XML {
         while (x.more()) {
             x.skipPast("<");
             if(x.more()) {
-                parse(x, jo, null, XMLParserConfiguration.ORIGINAL, s, false, null);
+                parse(x, jo, null, XMLParserConfiguration.ORIGINAL, s, false, null, null);
             }
         }
         return jo;
@@ -971,7 +987,7 @@ public class XML {
         while (x.more()) {
             x.skipPast("<");
             if(x.more()) {
-                parse(x, jo, null, XMLParserConfiguration.ORIGINAL, s, false, replacement);
+                parse(x, jo, null, XMLParserConfiguration.ORIGINAL, s, false, replacement, null);
             }
         }
         return jo;
