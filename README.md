@@ -118,3 +118,31 @@ For more information on files, please see [FILES.md](https://github.com/stleary/
 # Release history:
 
 For the release history, please see [RELEASES.md](https://github.com/stleary/JSON-java/blob/master/docs/RELEASES.md)
+
+
+# Milestone 3
+
+ **Team Member:**
+- Yi Chen (Cheryl0402)
+- Chao Liu (lordchao)
+
+
+**What we did**
+
+Inside *src/main/java/org.json* folder, we added a static method toJSONObject(Reader reader, YOURTYPEHERE keyTransformer)  
+to XML.java class. It takes a String reader and a function as a parameter, which allows clients to apply any kinds of key
+transformation.
+With an abstract function type as a parameter, clients can do any customized key modification to an jsonObject without
+changing code inside the method. Clients can simply define a transform function and pass it to the toJSONObject,which
+can greatly improve the re-usability of the toJSONObject method and the performance of clients use.
+
+**To Build**
+
+Load and build the project following the instructions above.
+If you use IntelliJ, you can simply open it with the IDE.
+
+
+**To test the method**
+
+Go to *src/test/XMLTest*, you can click the run button beside the addPrefixFunctionTest and
+reverseFunctionTest to run the test cases.
