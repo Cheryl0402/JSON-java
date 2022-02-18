@@ -48,6 +48,7 @@ import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external
@@ -2721,5 +2722,26 @@ public class JSONObject {
         return new JSONException(
             "JavaBean object contains recursively defined member variable of key " + quote(key)
         );
+    }
+
+    public Stream<JSONObject> toStream() {
+        Stream.Builder<JSONObject> builder = Stream.builder();
+        for(Entry<String, Object> entry: entrySet())
+            buildStream(entry.getKey(),entry.getValue(),builder);
+        return builder.build();
+    }
+
+    private void buildStream(String key, Object obj, Stream.Builder<JSONObject> builder){
+        if(obj instanceof JSONObject)
+            for(Entry<String, Object> e:((JSONObject) obj).map.entrySet())
+                buildStream(e.getKey(),e.getValue(),builder);
+        else if (obj instanceof  JSONArray)
+            for(int i=0; i<((JSONArray) obj).length();i++)
+                buildStream(key,((JSONArray) obj).get(i),builder);
+        else {
+            JSONObject newObj = new JSONObject();
+            newObj.put(key,obj);
+            builder.accept(newObj);
+        }
     }
 }

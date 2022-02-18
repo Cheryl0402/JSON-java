@@ -348,7 +348,8 @@ public class XML {
             // Close tag </
 
             token = x.nextToken();
-            token = func.func((String) token);
+            if (func != null)
+                token = func.func((String) token);
             if (name == null) {
                 throw x.syntaxError("Mismatched close tag " + token);
             }
@@ -366,7 +367,9 @@ public class XML {
             // Open tag <
 
         } else {
-            tagName = func.func((String) token);
+            if (func != null)
+                tagName = func.func((String) token);
+            else tagName = (String) token;
             //tagName = func((String) token);
             token = null;
             jsonObject = new JSONObject();
@@ -391,8 +394,10 @@ public class XML {
                 }
                 // attribute = value
                 if (token instanceof String) {
-                    string = func.func((String) token);
-                    //string = (String) token;
+                    if (func != null)
+                        string = func.func((String) token);
+                    else
+                        string = (String) token;
                     token = x.nextToken();
                     if (token == EQ) {
                         token = x.nextToken();
