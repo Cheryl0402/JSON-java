@@ -2726,15 +2726,15 @@ public class JSONObject {
 
     public Stream<JSONObject> toStream() {
         Stream.Builder<JSONObject> builder = Stream.builder();
-        for(Entry<String, Object> entry: entrySet())
-            buildStream(entry.getKey(),entry.getValue(),builder);
+        Iterator iterator = this.keys();
+
         return builder.build();
     }
 
-    private void buildStream(String key, Object obj, Stream.Builder<JSONObject> builder){
+    private void buildStream(String key, Object obj, Stream.Builder<JSONObject> builder) {
         if(obj instanceof JSONObject)
             for(Entry<String, Object> e:((JSONObject) obj).map.entrySet())
-                buildStream(e.getKey(),e.getValue(),builder);
+                buildStream(e.getKey(), e.getValue(), builder);
         else if (obj instanceof  JSONArray)
             for(int i=0; i<((JSONArray) obj).length();i++)
                 buildStream(key,((JSONArray) obj).get(i),builder);
@@ -2744,4 +2744,22 @@ public class JSONObject {
             builder.accept(newObj);
         }
     }
+
+    public Stream<JSONObject> buildStream1() {
+        for (Entry<String, Object> e: this.entrySet()) {
+            if (e.getValue() instanceof JSONObject)
+                Stream.concat(this.buildStream1(), Stream.of(this));
+            else if (e.getValue() instanceof JSONArray)
+                for (Object jo: (JSONArray) e.getValue()) {
+                    
+                }
+            else {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put(e.getKey(),e.getValue());
+                Stream.concat(Stream.of(this), Stream.of(jsonObject));
+            }
+        }
+        return Stream.of(this);
+    }
+
 }

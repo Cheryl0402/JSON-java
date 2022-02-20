@@ -3361,10 +3361,14 @@ public class JSONObjectTest {
         List<String> keys = new ArrayList<>();
         jsonObject.toStream().forEach(node -> {
             for (Map.Entry<String, Object> e: node.toMap().entrySet())
-                if (e.getKey().equals("title"))
+                if (e.getKey().equals("Books"))
                     keys.add(e.getValue().toString());
         });
-        jsonObject.toStream().forEach(System.out::println);
-        //System.out.println(keys);
+        keys.clear();
+        jsonObject.buildStream1().forEach(jsonObject1 -> {for (Map.Entry<String, Object> e: jsonObject1.toMap().entrySet())
+            keys.add(e.getKey());
+        });
+        //System.out.println(jsonObject.toStream());
+        System.out.println(keys);
     }
 }
