@@ -50,6 +50,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.json.CDL;
 import org.json.JSONArray;
@@ -3350,5 +3351,20 @@ public class JSONObjectTest {
         jsonObject.clear(); //Clears the JSONObject
         assertTrue("expected jsonObject.length() == 0", jsonObject.length() == 0); //Check if its length is 0
         jsonObject.getInt("key1"); //Should throws org.json.JSONException: JSONObject["asd"] not found
+    }
+
+    @Test
+    public void toStreamTest() {
+        String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
+        JSONObject jsonObject = XML.toJSONObject(xmlString);
+        //print all
+        System.out.println("all nodes");
+        jsonObject.toStream().forEach(System.out::println);
+        System.out.println("node with number of value larger than 1");
+        List<JSONObject> jsonList =  jsonObject.toStream().
+                filter(jsonObject1 -> jsonObject1.toMap().entrySet().size() > 1).
+                collect(Collectors.toList());
+        System.out.println(jsonList);
+
     }
 }

@@ -36,18 +36,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external
@@ -2722,4 +2716,68 @@ public class JSONObject {
             "JavaBean object contains recursively defined member variable of key " + quote(key)
         );
     }
+
+    static class JSONSpliteator implements Spliterator<JSONObject> {
+        private JSONObject jsonObject;
+        private Stream.Builder<JSONObject> builder;
+
+        JSONSpliteator(JSONObject jsonObject) {
+            this.jsonObject = jsonObject;
+        }
+
+
+        @Override
+        public boolean tryAdvance(Consumer<? super JSONObject> action) {
+            if (this.jsonObject == null) return false;
+            for (Map.Entry<String, Object> e: this.jsonObject.entrySet()) {
+                Object value = e.getValue();
+                if (value instanceof JSONObject) {
+                    this.jsonObject = (JSONObject) value;
+                    action.accept((JSONObject) value);
+                    tryAdvance(action);
+
+                }
+                else if (value instanceof JSONArray) {
+                    for (int i = 0; i < ((JSONArray) value).length(); ++i) {
+                        action.accept((JSONObject) ((JSONArray) value).get(i));
+                        this.jsonObject = (JSONObject) ((JSONArray) value).get(i);
+                        tryAdvance(action);
+
+                    }
+                } else {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(e.getKey(), e.getValue());
+                    action.accept(jsonObject);
+                    this.jsonObject = null;
+                    tryAdvance(action);
+
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public Spliterator<JSONObject> trySplit() {
+            return null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return 0;
+        }
+
+        @Override
+        public int characteristics() {
+            return Spliterator.DISTINCT | Spliterator.IMMUTABLE | Spliterator.NONNULL;
+        }
+    }
+
+    public Stream<JSONObject> toStream() {
+        return StreamSupport.stream(this.spliterator(), false);
+    }
+
+    private Spliterator<JSONObject> spliterator() {
+        return new JSONSpliteator(this);
+    }
+
 }
