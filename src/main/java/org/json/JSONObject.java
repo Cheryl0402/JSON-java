@@ -36,19 +36,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external
@@ -2724,42 +2717,67 @@ public class JSONObject {
         );
     }
 
-    public Stream<JSONObject> toStream() {
-        Stream.Builder<JSONObject> builder = Stream.builder();
-        Iterator iterator = this.keys();
+    static class JSONSpliteator implements Spliterator<JSONObject> {
+        private JSONObject jsonObject;
+        private Stream.Builder<JSONObject> builder;
 
-        return builder.build();
-    }
-
-    private void buildStream(String key, Object obj, Stream.Builder<JSONObject> builder) {
-        if(obj instanceof JSONObject)
-            for(Entry<String, Object> e:((JSONObject) obj).map.entrySet())
-                buildStream(e.getKey(), e.getValue(), builder);
-        else if (obj instanceof  JSONArray)
-            for(int i=0; i<((JSONArray) obj).length();i++)
-                buildStream(key,((JSONArray) obj).get(i),builder);
-        else {
-            JSONObject newObj = new JSONObject();
-            newObj.put(key,obj);
-            builder.accept(newObj);
+        JSONSpliteator(JSONObject jsonObject) {
+            this.jsonObject = jsonObject;
         }
-    }
 
-    public Stream<JSONObject> buildStream1() {
-        for (Entry<String, Object> e: this.entrySet()) {
-            if (e.getValue() instanceof JSONObject)
-                Stream.concat(this.buildStream1(), Stream.of(this));
-            else if (e.getValue() instanceof JSONArray)
-                for (Object jo: (JSONArray) e.getValue()) {
-                    
+
+        @Override
+        public boolean tryAdvance(Consumer<? super JSONObject> action) {
+            if (this.jsonObject == null) return false;
+            for (Map.Entry<String, Object> e: this.jsonObject.entrySet()) {
+                Object value = e.getValue();
+                if (value instanceof JSONObject) {
+                    this.jsonObject = (JSONObject) value;
+                    action.accept((JSONObject) value);
+                    tryAdvance(action);
+
                 }
-            else {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put(e.getKey(),e.getValue());
-                Stream.concat(Stream.of(this), Stream.of(jsonObject));
+                else if (value instanceof JSONArray) {
+                    for (int i = 0; i < ((JSONArray) value).length(); ++i) {
+                        action.accept((JSONObject) ((JSONArray) value).get(i));
+                        this.jsonObject = (JSONObject) ((JSONArray) value).get(i);
+                        tryAdvance(action);
+
+                    }
+                } else {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(e.getKey(), e.getValue());
+                    action.accept(jsonObject);
+                    this.jsonObject = null;
+                    tryAdvance(action);
+
+                }
             }
+            return false;
         }
-        return Stream.of(this);
+
+        @Override
+        public Spliterator<JSONObject> trySplit() {
+            return null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return 0;
+        }
+
+        @Override
+        public int characteristics() {
+            return Spliterator.DISTINCT | Spliterator.IMMUTABLE | Spliterator.NONNULL;
+        }
+    }
+
+    public Stream<JSONObject> toStream() {
+        return StreamSupport.stream(this.spliterator(), false);
+    }
+
+    private Spliterator<JSONObject> spliterator() {
+        return new JSONSpliteator(this);
     }
 
 }

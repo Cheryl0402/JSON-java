@@ -3357,18 +3357,14 @@ public class JSONObjectTest {
     public void toStreamTest() {
         String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
         JSONObject jsonObject = XML.toJSONObject(xmlString);
+        //print all
+        System.out.println("all nodes");
+        jsonObject.toStream().forEach(System.out::println);
+        System.out.println("node with number of value larger than 1");
+        List<JSONObject> jsonList =  jsonObject.toStream().
+                filter(jsonObject1 -> jsonObject1.toMap().entrySet().size() > 1).
+                collect(Collectors.toList());
+        System.out.println(jsonList);
 
-        List<String> keys = new ArrayList<>();
-        jsonObject.toStream().forEach(node -> {
-            for (Map.Entry<String, Object> e: node.toMap().entrySet())
-                if (e.getKey().equals("Books"))
-                    keys.add(e.getValue().toString());
-        });
-        keys.clear();
-        jsonObject.buildStream1().forEach(jsonObject1 -> {for (Map.Entry<String, Object> e: jsonObject1.toMap().entrySet())
-            keys.add(e.getKey());
-        });
-        //System.out.println(jsonObject.toStream());
-        System.out.println(keys);
     }
 }
