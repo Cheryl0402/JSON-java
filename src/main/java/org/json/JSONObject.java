@@ -2730,36 +2730,6 @@ public class JSONObject {
             this.jsonObject = jsonObject;
         }
 
-//        @Override
-//        public boolean tryAdvance(Consumer<? super JSONObject> action) {
-//            if (this.jsonObject == null) return false;
-//            for (Map.Entry<String, Object> e: this.jsonObject.entrySet()) {
-//                Object value = e.getValue();
-//                if (value instanceof JSONObject) {
-//                    this.jsonObject = (JSONObject) value;
-//                    action.accept((JSONObject) value);
-//                    tryAdvance(action);
-//
-//                }
-//                else if (value instanceof JSONArray) {
-//                    for (int i = 0; i < ((JSONArray) value).length(); ++i) {
-//                        action.accept((JSONObject) ((JSONArray) value).get(i));
-//                        this.jsonObject = (JSONObject) ((JSONArray) value).get(i);
-//                        tryAdvance(action);
-//
-//                    }
-//                } else {
-//                    JSONObject jsonObject = new JSONObject();
-//                    jsonObject.put(e.getKey(), e.getValue());
-//                    action.accept(jsonObject);
-//                    this.jsonObject = null;
-//                    tryAdvance(action);
-//
-//                }
-//            }
-//            return false;
-//        }
-
         /**
          * If a remaining element exists, performs the given action on it, returning true; else returns false.
          * @param action
