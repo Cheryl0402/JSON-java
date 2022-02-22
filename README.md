@@ -146,3 +146,29 @@ If you use IntelliJ, you can simply open it with the IDE.
 
 Go to *src/test/XMLTest*, you can click the run button beside the addPrefixFunctionTest and
 reverseFunctionTest to run the test cases.
+
+# Milestone 4
+
+**Team Member:**
+- Yi Chen (Cheryl0402)
+- Chao Liu (lordchao)
+
+
+**What we did**
+
+Inside `src/main/java/org.json` folder, we added a streaming method to JSONObject.java class by using interface Spliterator
+This method transforms JSONObject to <key, value> entry </key,value> stream so the client can trace JSON entry node
+with stream operations.
+
+**To Build**
+
+Load and build the project following the instructions above.
+If you use IntelliJ, you can simply open it with the IDE.
+
+
+**To test the method**
+
+Go to `src/test/JSONObjectTest`, you can click the run button beside the toStreamTest1() and toStreamTest2()
+to run the test cases. The first test focuses on checking if the streaming method is successfully transformed 
+an JSONObject into <key, value> entry node. The second test tests stream operations on the transformed 
+<key, value> entry stream.
