@@ -3353,18 +3353,48 @@ public class JSONObjectTest {
         jsonObject.getInt("key1"); //Should throws org.json.JSONException: JSONObject["asd"] not found
     }
 
+
+    //========================================== Milestone 4 test ======================================================
+    /**
+     * Tests transform JSONObject into JSONObject stream
+     */
     @Test
-    public void toStreamTest() {
-        String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
+    public void toStreamTest1() {
+        String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<contact>\n" +
+                "  <nick>Crista </nick>\n" +
+                "  <name>Crista Lopes</name>\n" +
+                "  <address>\n" +
+                "    <street>Ave of Nowhere</street>\n" +
+                "    <zipcode>92614</zipcode>\n" +
+                "  </address>\n" +
+                "</contact>";
         JSONObject jsonObject = XML.toJSONObject(xmlString);
-        //print all
-        System.out.println("all nodes");
         jsonObject.toStream().forEach(System.out::println);
-        System.out.println("node with number of value larger than 1");
-        List<JSONObject> jsonList =  jsonObject.toStream().
-                filter(jsonObject1 -> jsonObject1.toMap().entrySet().size() > 1).
-                collect(Collectors.toList());
-        System.out.println(jsonList);
+        List<JSONObject> expected;
+        expected = new ArrayList<JSONObject>(Arrays.asList("[{'contact':{'nick':'Crista','address':{'zipcode':92614,'street':'Ave of Nowhere'},'name':'Crista Lopes'}}",
+        "{'nick':'Crista'}", "{'address':{'zipcode':92614,'street':'Ave of Nowhere'}}", "{'zipcode':92614}", "{'street':'Ave of Nowhere'}", "{'name':'Crista Lopes'}]"));
+        List<JSONObject> actual = jsonObject.toStream().collect(Collectors.toList());
+        System.out.println(actual);
 
     }
+
+    /**
+     * Transform JSONObject into <key,value> entry </key,value> stream
+     * Tests extract value by a given key from the stream
+     */
+    @Test
+    public void toStreamTest2() {
+        String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
+        JSONObject jsonObject = XML.toJSONObject(xmlString);
+        // extract values with key "title"
+        List<String> expected = new ArrayList<>(Arrays.asList("AAA","BBB"));
+        List<String> actual = jsonObject.toStream()
+                .filter(jsonObject1 -> jsonObject1.keySet().contains("title"))
+                .map(node -> node.getString("title"))
+                .collect(Collectors.toList());
+        assertEquals(expected, actual);
+    }
+
+    //================================== End of milestone4 test ========================================================
 }
