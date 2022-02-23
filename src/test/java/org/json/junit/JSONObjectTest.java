@@ -3395,7 +3395,7 @@ public class JSONObjectTest {
     }
 
     /**
-     * Transform JSONObject into <key,value> entry </key,value> stream
+     * Transform JSONObject into  JSONObject stream
      * Tests extract value by a given key from the stream
      */
     @Test
@@ -3407,6 +3407,24 @@ public class JSONObjectTest {
         List<String> actual = jsonObject.toStream()
                 .filter(jsonObject1 -> jsonObject1.keySet().contains("title"))
                 .map(node -> node.getString("title"))
+                .collect(Collectors.toList());
+        assertEquals(expected, actual);
+    }
+
+    /**
+     * Transform JSONObject into JSONObject stream
+     * Tests transforming JSONObject in the stream
+     */
+    @Test
+    public void toStreamTest3() {
+        String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
+        JSONObject jsonObject = XML.toJSONObject(xmlString);
+        String str ="{\"BOOKS\":{\"BOOK\":[{\"AUTHOR\":\"ASMITH\",\"TITLE\":\"AAA\"},{\"AUTHOR\":\"BSMITH\",\"TITLE\":\"BBB\"}]}}";
+        List<String> expected = new ArrayList<>();
+        expected.add(str);
+        List<String> actual = jsonObject.toStream()
+                .filter(node -> node.toString().length() > 50)
+                .map(node -> node.toString().toUpperCase())
                 .collect(Collectors.toList());
         assertEquals(expected, actual);
     }
