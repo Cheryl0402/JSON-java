@@ -157,8 +157,8 @@ reverseFunctionTest to run the test cases.
 **What we did**
 
 Inside `src/main/java/org.json` folder, we added a streaming method to JSONObject.java class by using interface Spliterator
-This method transforms JSONObject to <key, value> entry </key,value> stream so the client can trace JSON entry node
-with stream operations.
+This method transforms JSONObject to <key, value> pair JSONObject stream so the client can trace JSONObject node with 
+stream operations.
 
 **To Build**
 
@@ -168,7 +168,7 @@ If you use IntelliJ, you can simply open it with the IDE.
 
 **To test the method**
 
-Go to `src/test/JSONObjectTest`, you can click the run button beside the toStreamTest1() and toStreamTest2()
-to run the test cases. The first test focuses on checking if the streaming method is successfully transformed 
-an JSONObject into <key, value> entry node. The second test tests stream operations on the transformed 
-<key, value> entry stream.
+Go to `src/test/JSONObjectTest`, you can click the run button beside the toStreamTest1(), toStreamTest2(), and 
+toStreamTest3() to run the test cases. The first test focuses on checking if the streaming method is successfully transformed 
+an JSONObject into <key, value> pair JSONObject node. The second and third tests test stream operations on the transformed 
+JSONObject node stream.

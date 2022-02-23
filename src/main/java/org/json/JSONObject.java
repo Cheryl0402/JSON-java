@@ -2733,7 +2733,7 @@ public class JSONObject {
         /**
          * If a remaining element exists, performs the given action on it, returning true; else returns false.
          * @param action
-         * @return false if no remaining elements existed upon entry to this method, else true.
+         * @return  false if no remaining elements existed upon entry to this method, else true.
          */
         @Override
         public boolean tryAdvance(Consumer<? super JSONObject> action) {
