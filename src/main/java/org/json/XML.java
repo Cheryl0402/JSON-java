@@ -31,6 +31,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 
 /**
@@ -998,6 +1002,22 @@ public class XML {
         return jo;
     }
 
-
+    public static JSONObject toJSONObject(Reader reader, Consumer callBack) throws ExecutionException, InterruptedException {
+        CompletableFuture<JSONObject> cf = CompletableFuture.supplyAsync(new Supplier<JSONObject>() {
+            @Override
+            public JSONObject get() {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return toJSONObject(reader);
+            }
+        });
+        cf.thenAccept(callBack);
+        JSONObject JO = cf.get();
+        Thread.sleep(2000);
+        return JO;
+    }
 
 }
