@@ -40,6 +40,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 import org.json.*;
 import org.junit.Rule;
@@ -1163,5 +1165,22 @@ public class XMLTest {
             JSONObject jo2 = XML.toJSONObject(new StringReader(xmlString), customerFunction2);
         assertEquals(jo2.toString(), result2);
 
+    }
+
+    //******************************************** Milestone5 test *****************************************************
+    @Test
+    public void testAsync() throws ExecutionException, InterruptedException {
+        String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
+        Consumer<String> func = x->System.out.println("hello");
+        class func implements Consumer {
+
+            @Override
+            public void accept(Object o) {
+                System.out.println("he");
+            }
+        }
+        func func1 = new func();
+        JSONObject jo = XML.toJSONObject(new StringReader(xmlString),func1);
+        System.out.println(jo);
     }
 }

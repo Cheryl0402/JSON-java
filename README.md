@@ -172,3 +172,20 @@ Go to `src/test/JSONObjectTest`, you can click the run button beside the toStrea
 toStreamTest3() to run the test cases. The first test focuses on checking if the streaming method is successfully transformed 
 an JSONObject into <key, value> pair JSONObject node. The second and third tests test stream operations on the transformed 
 JSONObject node stream.
+
+# Milestone 5
+
+**Team Member:**
+- Yi Chen (Cheryl0402)
+- Chao Liu (lordchao)
+
+**To Build**
+
+Load and build the project following the instructions above.
+If you use IntelliJ, you can simply open it with the IDE.
+
+
+**To test the method**
+
+Go to `src/test/XMLTest`, you can click the run button beside the test cases inside the milestone5 test
+part.
