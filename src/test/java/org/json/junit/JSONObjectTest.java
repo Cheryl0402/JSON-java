@@ -3432,20 +3432,4 @@ public class JSONObjectTest {
     }
 
     //================================== End of milestone4 test ========================================================
-
-    @Test
-    public void testAsync() throws ExecutionException, InterruptedException {
-        String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
-        Consumer<String> func = x->System.out.println("hello");
-        class func implements Consumer {
-
-            @Override
-            public void accept(Object o) {
-                System.out.println("he");
-            }
-        }
-        func func1 = new func();
-        JSONObject jo = XML.toJSONObject(new StringReader(xmlString),func1);
-        System.out.println(jo);
-    }
 }
