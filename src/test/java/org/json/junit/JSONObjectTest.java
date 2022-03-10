@@ -49,7 +49,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -3430,4 +3432,20 @@ public class JSONObjectTest {
     }
 
     //================================== End of milestone4 test ========================================================
+
+    @Test
+    public void testAsync() throws ExecutionException, InterruptedException {
+        String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
+        Consumer<String> func = x->System.out.println("hello");
+        class func implements Consumer {
+
+            @Override
+            public void accept(Object o) {
+                System.out.println("he");
+            }
+        }
+        func func1 = new func();
+        JSONObject jo = XML.toJSONObject(new StringReader(xmlString),func1);
+        System.out.println(jo);
+    }
 }
