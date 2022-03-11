@@ -1181,4 +1181,18 @@ public class XMLTest {
         JSONObject jo = XML.toJSONObject(new StringReader(xmlString), callBack);
         System.out.println(jo);
     }
+
+    @Test
+    public void testResult() throws ExecutionException, InterruptedException {
+        String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
+        class func implements Consumer {
+            @Override
+            public void accept(Object o) {
+                System.out.println("hello");
+            }
+        }
+        func callBack = new func();
+        JSONObject jo = XML.toJSONObject(new StringReader(xmlString), callBack);
+        assertEquals(jo.toString(), XML.toJSONObject(xmlString).toString());
+    }
 }
