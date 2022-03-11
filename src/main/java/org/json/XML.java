@@ -1002,22 +1002,37 @@ public class XML {
         return jo;
     }
 
-    public static JSONObject toJSONObject(Reader reader, Consumer callBack) throws ExecutionException, InterruptedException {
-        CompletableFuture<JSONObject> cf = CompletableFuture.supplyAsync(new Supplier<JSONObject>() {
+    //************************* milestone 5 ****************************************************************************
+//    public static JSONObject toJSONObject(Reader reader, Consumer<JSONObject> callBack) throws ExecutionException, InterruptedException {
+//        CompletableFuture<JSONObject> cfuture = CompletableFuture.supplyAsync(new Supplier<JSONObject>() {
+//            @Override
+//            public JSONObject get() {
+//                JSONObject jsonObject = null;
+//                try {
+//                    jsonObject = toJSONObject(reader);
+//                    Thread.sleep(5000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                return jsonObject;
+//            }
+//        });
+//        cfuture.thenAccept(callBack);
+//        JSONObject resultJO = cfuture.get();
+//        Thread.sleep(2000);
+//        return resultJO;
+//    }
+
+    public static CompletableFuture<JSONObject> toJSONObject(Reader reader, Consumer consumer) {
+        CompletableFuture<JSONObject> completableFuture = CompletableFuture.supplyAsync(new Supplier<JSONObject>() {
             @Override
             public JSONObject get() {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                return toJSONObject(reader);
+                JSONObject jsonObject = null;
+                jsonObject = toJSONObject(reader);
+                return jsonObject;
             }
         });
-        cf.thenAccept(callBack);
-        JSONObject JO = cf.get();
-        Thread.sleep(2000);
-        return JO;
+        return completableFuture;
     }
-
+    // ************************ End of milestone 5 **************************************
 }

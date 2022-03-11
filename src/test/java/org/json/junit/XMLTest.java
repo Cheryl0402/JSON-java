@@ -40,6 +40,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
@@ -1168,19 +1169,70 @@ public class XMLTest {
     }
 
     //******************************************** Milestone5 test *****************************************************
-    @Test
-    public void testAsync() throws ExecutionException, InterruptedException {
-        String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
-        Consumer<String> func = x->System.out.println("hello");
-        class func implements Consumer {
+//    @Test
+//    public void testAsync() throws ExecutionException, InterruptedException {
+//        String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
+//        class IntroConsumer implements Consumer {
+//
+//            @Override
+//            public void accept(Object o) {
+//                System.out.println("object: " + o.toString());
+//            }
+//        }
+//        IntroConsumer printIntro = new IntroConsumer();
+//        JSONObject jo = XML.toJSONObject(new StringReader(xmlString),printIntro);
+//        System.out.println(jo);
+//    }
 
-            @Override
+    @Test
+    public void toJSONObjectAsyncTest() throws ExecutionException, InterruptedException {
+        String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<contact>\n" +
+                "  <nick>Crista </nick>\n" +
+                "  <name>Crista Lopes</name>\n" +
+                "  <address>\n" +
+                "    <street>Ave of Nowhere</street>\n" +
+                "    <zipcode>92614</zipcode>\n" +
+                "  </address>\n" +
+                "</contact>";
+
+        class MyConsumer implements Consumer{
+            public String res;
             public void accept(Object o) {
-                System.out.println("he");
+                res = "result: " + o.toString();
+                return;
             }
         }
-        func func1 = new func();
-        JSONObject jo = XML.toJSONObject(new StringReader(xmlString),func1);
-        System.out.println(jo);
+        MyConsumer myConsumer = new MyConsumer();
+        CompletableFuture<JSONObject> completableFuture = XML.toJSONObject(new StringReader(xmlString), myConsumer);
+        JSONObject jsonObject = completableFuture.get();
+        completableFuture.thenAccept(myConsumer);
+        completableFuture.exceptionally((e) -> {
+            e.printStackTrace();
+            return null;
+        });
+        assertEquals("result: "+jsonObject.toString(), myConsumer.res);
     }
+
+    @Test
+    public void toJSONObjectAsyncHandleArrayTest() throws ExecutionException, InterruptedException {
+        String xmlString = "<Books><book><title>AAA</title><author>ASmith</author></book><book><title>BBB</title><author>BSmith</author></book></Books>";
+        class MyConsumer implements Consumer{
+            public String res;
+            public void accept(Object e) {
+                res = "NO exception: " + e.toString();
+                return;
+            }
+        }
+        MyConsumer myConsumer = new MyConsumer();
+        CompletableFuture<JSONObject> completableFuture = XML.toJSONObject(new StringReader(xmlString), myConsumer);
+        JSONObject jsonObject = completableFuture.get();
+        completableFuture.thenAccept(myConsumer);
+        completableFuture.exceptionally((e) -> {
+            e.printStackTrace();
+            return null;
+        });
+        assertEquals("NO exception: " + jsonObject.toString(), myConsumer.res);
+    }
+    //************************************* End of milestone 5 test ****************************************************
 }
